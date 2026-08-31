@@ -64,8 +64,8 @@ SQLAlchemy 2 + SQLite
 ## 交付前检查
 
 ```text
-backend/.venv/bin/pytest -q backend/tests
-backend/.venv/bin/python -m compileall -q backend/app backend/scripts
+/opt/miniconda3/envs/pytorch_env/bin/python -m pytest -q backend/tests
+/opt/miniconda3/envs/pytorch_env/bin/python -m compileall -q backend/app backend/scripts
 ```
 
 初始化演示库时使用 `scripts.seed --as-of YYYY-MM-DD`。脚本写入 1 个管理员、8 名读者、15 本图书和 12 条借阅记录，重复执行会跳过已有数据，不清空真实数据。

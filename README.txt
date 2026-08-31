@@ -4,15 +4,14 @@
 后端启动：
 
     cd backend
-    python3.10 -m venv .venv
-    .venv/bin/python -m pip install -r requirements.txt
-    .venv/bin/python -m scripts.init_db
-    .venv/bin/python -m scripts.seed --as-of 2026-08-31
-    .venv/bin/uvicorn app.main:app --reload --port 8000
+    /opt/miniconda3/envs/pytorch_env/bin/python -m pip install -r requirements.txt
+    /opt/miniconda3/envs/pytorch_env/bin/python -m scripts.init_db
+    /opt/miniconda3/envs/pytorch_env/bin/python -m scripts.seed --as-of 2026-08-31
+    /opt/miniconda3/envs/pytorch_env/bin/python -m uvicorn app.main:app --reload --port 8000
 
 测试：
 
-    backend/.venv/bin/pytest -q backend/tests
+    /opt/miniconda3/envs/pytorch_env/bin/python -m pytest -q backend/tests
 
 课程提交所需的技术报告、演示材料和 React 前台应与 backend 目录一起打包；
 前端运行、演示账号、GitHub Pages 和评分证据清单见 frontend/README.md。

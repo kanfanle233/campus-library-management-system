@@ -14,7 +14,7 @@
 | 文件导入 | 选择课程表头 CSV，预览前几行，确认整批导入 | `POST /api/v1/files/books/import`、成功/失败结果 |
 | 文件导出 | 下载图书、读者或借阅 CSV | `GET /api/v1/files/*/export`、下载文件 |
 | 功能整合 | 管理员选择读者办理借阅，归还时确认罚款预览，观察库存恢复和总览指标 | `/loans/borrow`、`return-preview`、`return`、`dashboard/stats` |
-| 正常启动 | `pnpm dev` 静态演示；`.venv/bin/uvicorn` 本地后端 | `frontend/README.md`、`backend/README.txt` |
+| 正常启动 | `pnpm dev` 静态演示；`/opt/miniconda3/envs/pytorch_env/bin/python -m uvicorn` 本地后端 | `frontend/README.md`、`backend/README.txt` |
 | 异常处理 | 错误账号、重复 ISBN、无库存、逾期借阅、非法 CSV 行 | 页面错误提示、稳定错误码、27 项后端测试 |
 
 ## 报告项（50 分）

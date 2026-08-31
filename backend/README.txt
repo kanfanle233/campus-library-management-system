@@ -16,13 +16,12 @@ Install and run
 
 From this `backend` directory:
 
-    python3.10 -m venv .venv
-    .venv/bin/python -m pip install -r requirements.txt
+    /opt/miniconda3/envs/pytorch_env/bin/python -m pip install -r requirements.txt
     cp .env.example .env
     # Set a private JWT_SECRET_KEY in .env before sharing the project.
-    .venv/bin/python -m scripts.init_db
-    .venv/bin/python -m scripts.seed --as-of 2026-08-31
-    .venv/bin/uvicorn app.main:app --reload --port 8000
+    /opt/miniconda3/envs/pytorch_env/bin/python -m scripts.init_db
+    /opt/miniconda3/envs/pytorch_env/bin/python -m scripts.seed --as-of 2026-08-31
+    /opt/miniconda3/envs/pytorch_env/bin/python -m uvicorn app.main:app --reload --port 8000
 
 The demo administrator is `admin` / `admin123`.  Demo readers use their
 student ID (for example `DEMO-S001`) and password `demo123`.  These credentials
@@ -67,15 +66,15 @@ export.
 
 For a local file-write demonstration, run:
 
-    .venv/bin/python -m scripts.export_csv --output-dir data/exports --as-of 2026-08-31
+    /opt/miniconda3/envs/pytorch_env/bin/python -m scripts.export_csv --output-dir data/exports --as-of 2026-08-31
 
 Tests and course evidence
 -------------------------
 
 From the project root, run:
 
-    backend/.venv/bin/pytest -q backend/tests
-    backend/.venv/bin/python -m compileall -q backend/app backend/scripts
+    /opt/miniconda3/envs/pytorch_env/bin/python -m pytest -q backend/tests
+    /opt/miniconda3/envs/pytorch_env/bin/python -m compileall -q backend/app backend/scripts
 
 The test suite covers authentication, reader CRUD and deactivation rules,
 book CRUD/search/inventory rules, atomic borrow/return/fine calculations,
