@@ -1,0 +1,9 @@
+student_id,name,contact,borrow_limit
+DEMO-S001,DEMO读者01,DEMO-contact-01,5
+DEMO-S002,DEMO读者02,DEMO-contact-02,5
+DEMO-S003,DEMO读者03,DEMO-contact-03,5
+DEMO-S004,DEMO读者04,DEMO-contact-04,5
+DEMO-S005,DEMO读者05,DEMO-contact-05,5
+DEMO-S006,DEMO读者06,DEMO-contact-06,5
+DEMO-S007,DEMO读者07,DEMO-contact-07,5
+DEMO-S008,DEMO读者08,DEMO-contact-08,5

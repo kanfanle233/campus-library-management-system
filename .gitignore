@@ -1,0 +1,33 @@
+# Python and local tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+.env
+
+# Frontend dependencies, builds and local API settings
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Local SQLite files (seed CSV files are source data and remain tracked)
+backend/data/*.db
+backend/data/*.db-shm
+backend/data/*.db-wal
+backend/data/*.sqlite3
+backend/data/*.sqlite3-shm
+backend/data/*.sqlite3-wal
+backend/data/*.sqlite
+backend/data/*.sqlite-shm
+backend/data/*.sqlite-wal
+backend/data/exports/
+
+# Local package manager cache
+.pnpm-store/
+
+# IDE settings
+.idea/

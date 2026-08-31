@@ -1,0 +1,9 @@
+packages:
+  - "."
+
+allowBuilds:
+  esbuild: set this to true or false
+
+# Vite uses esbuild to transform the React entrypoint during production builds.
+onlyBuiltDependencies:
+  - esbuild
