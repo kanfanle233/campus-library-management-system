@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { HashRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import {
-  ArrowLeft, ArrowRight, ArrowUpRight, BookBookmark, BookOpen, Books, ChartBar,
-  Check, Database, DownloadSimple, House, List, MagnifyingGlass,
-  Plus, Printer, SignOut, UploadSimple, UserCircle, UserPlus, Users, WarningCircle, X,
-} from "@phosphor-icons/react";
 import { clearSession, createGateway, DEMO_DATE, storedUser } from "./data";
 import { AppError, type Analytics, type Book, type BookPayload, type DashboardStats, type FileImportResult, type Gateway, type Loan, type ReaderPayload, type ReturnPreview, type User } from "./types";
 
@@ -28,53 +23,14 @@ const useApp = () => {
 const formatDate = (value: string | null | undefined) => value ? value.slice(0, 10) : "—";
 const cn = (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" ");
 
-function useLiquidInteraction() {
-  useEffect(() => {
-    const root = document.documentElement;
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    let pointerFrame = 0;
-
-    const updateScroll = () => {
-      const distance = document.documentElement.scrollHeight - window.innerHeight;
-      root.style.setProperty("--scroll-progress", `${distance > 0 ? Math.min(1, window.scrollY / distance) : 0}`);
-    };
-    const updatePointer = (event: PointerEvent) => {
-      cancelAnimationFrame(pointerFrame);
-      pointerFrame = requestAnimationFrame(() => {
-        root.style.setProperty("--pointer-x", `${event.clientX}px`);
-        root.style.setProperty("--pointer-y", `${event.clientY}px`);
-        const interactive = (event.target as HTMLElement | null)?.closest<HTMLElement>(".glass-interactive");
-        if (interactive) {
-          const rect = interactive.getBoundingClientRect();
-          interactive.style.setProperty("--local-x", `${event.clientX - rect.left}px`);
-          interactive.style.setProperty("--local-y", `${event.clientY - rect.top}px`);
-        }
-      });
-    };
-
-    updateScroll();
-    window.addEventListener("scroll", updateScroll, { passive: true });
-    if (finePointer.matches) window.addEventListener("pointermove", updatePointer, { passive: true });
-    return () => {
-      cancelAnimationFrame(pointerFrame);
-      window.removeEventListener("scroll", updateScroll);
-      window.removeEventListener("pointermove", updatePointer);
-    };
-  }, []);
-}
-
-function Brand({ compact = false }: { compact?: boolean }) {
-  return <div className={cn("brand", compact && "brand-compact")}><span className="brand-symbol" aria-hidden="true"><BookOpen size={21} weight="duotone" /></span><span><strong>校园图书馆</strong><small>Campus Library</small></span></div>;
-}
-
 function ErrorBanner({ error }: { error: unknown }) {
   if (!error) return null;
   const value = error instanceof AppError ? error : new AppError("请求失败，请稍后重试");
-  return <div className="message message-error" role="alert"><span className="message-icon"><WarningCircle size={17} weight="fill" /></span><span><strong>{value.message}</strong>{value.code !== "UNKNOWN_ERROR" && <small>{value.code}</small>}</span></div>;
+  return <div className="message message-error" role="alert"><span className="message-icon">!</span><span><strong>{value.message}</strong>{value.code !== "UNKNOWN_ERROR" && <small>{value.code}</small>}</span></div>;
 }
 
 function EmptyState({ title, detail, action }: { title: string; detail?: string; action?: ReactNode }) {
-  return <div className="empty-state"><div className="empty-mark"><Books size={23} weight="duotone" /></div><h3>{title}</h3>{detail && <p>{detail}</p>}{action}</div>;
+  return <div className="empty-state"><div className="empty-mark">○</div><h3>{title}</h3>{detail && <p>{detail}</p>}{action}</div>;
 }
 
 function LoadingRows({ count = 4 }: { count?: number }) {
@@ -82,25 +38,23 @@ function LoadingRows({ count = 4 }: { count?: number }) {
 }
 
 function Button({ children, variant = "primary", type = "button", disabled, onClick, className = "" }: { children: ReactNode; variant?: "primary" | "tonal" | "quiet" | "danger"; type?: "button" | "submit"; disabled?: boolean; onClick?: () => void; className?: string }) {
-  return <button type={type} className={cn("button", "glass-interactive", `button-${variant}`, className)} disabled={disabled} onClick={onClick}>{children}</button>;
+  return <button type={type} className={cn("button", `button-${variant}`, className)} disabled={disabled} onClick={onClick}>{children}</button>;
 }
 
 function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" | "danger" | "blue" }) {
   return <span className={`status-pill status-${tone}`}>{children}</span>;
 }
 
-function PageHeader({ eyebrow, title, detail, meta, actions }: { eyebrow?: string; title: string; detail?: string; meta?: ReactNode; actions?: ReactNode }) {
-  return <div className={cn("page-header", Boolean(meta) && "page-header-meta")}><div>{eyebrow && <div className="eyebrow">{eyebrow}</div>}<h1>{title}</h1>{detail && <p>{detail}</p>}{meta && <div className="page-meta">{meta}</div>}</div>{actions && <div className="page-actions">{actions}</div>}</div>;
+function PageHeader({ eyebrow, title, detail, actions }: { eyebrow?: string; title: string; detail?: string; actions?: ReactNode }) {
+  return <div className="page-header"><div>{eyebrow && <div className="eyebrow">{eyebrow}</div>}<h1>{title}</h1>{detail && <p>{detail}</p>}</div>{actions && <div className="page-actions">{actions}</div>}</div>;
 }
 
 function Panel({ children, className = "", title, detail, actions }: { children: ReactNode; className?: string; title?: string; detail?: string; actions?: ReactNode }) {
-  return <section className={cn("panel", "content-surface", className)}>{(title || actions) && <div className="panel-heading"><div>{title && <h2>{title}</h2>}{detail && <p>{detail}</p>}</div>{actions}</div>}{children}</section>;
+  return <section className={cn("panel", className)}>{(title || actions) && <div className="panel-heading"><div>{title && <h2>{title}</h2>}{detail && <p>{detail}</p>}</div>{actions}</div>}{children}</section>;
 }
 
 function StatCard({ label, value, note, tone = "blue" }: { label: string; value: string | number; note?: string; tone?: "blue" | "green" | "amber" | "purple" }) {
-  const icons = { blue: BookOpen, purple: Books, green: BookBookmark, amber: Users };
-  const Icon = icons[tone];
-  return <div className={`stat-card stat-${tone}`}><span className="stat-icon" aria-hidden="true"><Icon size={29} weight="duotone" /></span><div><p>{label}</p><strong>{value}</strong>{note && <small>{note}</small>}</div></div>;
+  return <div className={`stat-card stat-${tone}`}><span className="stat-dot" /><div><p>{label}</p><strong>{value}</strong>{note && <small>{note}</small>}</div></div>;
 }
 
 function AppShell() {
@@ -108,57 +62,27 @@ function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  useEffect(() => setMenuOpen(false), [location.pathname]);
   if (!user) return <Navigate to="/login" replace />;
   const adminItems = [
-    { path: "/admin/overview", label: "总览", icon: House },
-    { path: "/admin/books", label: "图书管理", icon: Books },
-    { path: "/admin/readers", label: "读者管理", icon: Users },
-    { path: "/admin/loans", label: "借还书", icon: BookBookmark },
-    { path: "/admin/analytics", label: "数据分析", icon: ChartBar },
-    { path: "/admin/data", label: "导入导出", icon: Database },
+    ["/admin/overview", "总览", "01"], ["/admin/books", "图书管理", "02"], ["/admin/readers", "读者管理", "03"],
+    ["/admin/loans", "借还书", "04"], ["/admin/analytics", "数据分析", "05"], ["/admin/data", "导入导出", "06"],
   ];
-  const readerItems = [
-    { path: "/catalog", label: "图书目录", icon: Books },
-    { path: "/my-loans", label: "我的借阅", icon: BookBookmark },
-    { path: "/profile", label: "个人资料", icon: UserCircle },
-  ];
+  const readerItems = [["/catalog", "图书目录", "01"], ["/my-loans", "我的借阅", "02"], ["/profile", "个人资料", "03"]];
   const items = user.role === "ADMIN" ? adminItems : readerItems;
   const logout = () => { clearSession(); setUser(null); toast("已安全退出", "info"); navigate("/login"); };
   const watermarkLabel = ["Campus Library", user.name, user.role === "ADMIN" ? "ADMIN" : user.student_id || user.login_name || "READER"].join(" · ");
   return <div className="app-shell">
-    <div className="page-background" aria-hidden="true" />
-    <div className="pointer-light" aria-hidden="true" />
-    <div className="scroll-progress" aria-hidden="true" />
-    <div className="watermark-layer" aria-hidden="true"><div className="watermark-grid">{Array.from({ length: 28 }, (_, index) => <span className="watermark-item" key={index}>{watermarkLabel}</span>)}</div></div>
-    <header className="liquid-nav glass-interactive">
-      <Link className="brand-link" to={user.role === "ADMIN" ? "/admin/overview" : "/catalog"} aria-label="返回图书馆首页"><Brand compact /></Link>
-      <button className="menu-toggle glass-interactive" aria-label={menuOpen ? "关闭菜单" : "打开菜单"} aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={20} /> : <List size={20} />}</button>
-      <nav className="desktop-nav" aria-label="主导航">
-        {items.map(({ path, label, icon: Icon }) => {
-          const active = location.pathname === path;
-          return <Link key={path} to={path} aria-current={active ? "page" : undefined} className={cn("nav-link", "glass-interactive", active && "nav-link-active")}><Icon size={17} weight={active ? "fill" : "regular"} aria-hidden="true" /><span>{label}</span></Link>;
-        })}
-      </nav>
-      <div className="nav-identity">
-        <span className="online-dot" aria-hidden="true" />
-        <span className="identity-name">{user.name}</span>
-        <span className="avatar">{user.name.slice(0, 1)}</span>
-        <button className="icon-button glass-interactive" onClick={logout} aria-label="退出登录" title="退出登录"><SignOut size={18} /></button>
-      </div>
-    </header>
-    <button className={cn("nav-scrim", menuOpen && "nav-scrim-visible")} onClick={() => setMenuOpen(false)} aria-label="关闭导航" tabIndex={menuOpen ? 0 : -1} />
-    <aside className={cn("mobile-drawer", menuOpen && "mobile-drawer-open")} aria-hidden={!menuOpen}>
-      <Brand />
+    <div className="watermark-layer" aria-hidden="true"><div className="watermark-grid">{Array.from({ length: 36 }, (_, index) => <span className="watermark-item" key={index}>{watermarkLabel}</span>)}</div></div>
+    <aside className={cn("sidebar", menuOpen && "sidebar-open")}>
+      <div className="brand"><span className="brand-symbol">+</span><span><strong>Campus Library</strong><small>校园图书馆</small></span></div>
       <div className="mode-tag">{gateway.mode === "demo" ? "演示模式 · 刷新重置" : "本地真实数据"}</div>
-      <nav className="mobile-nav" aria-label="移动端主导航">
-        {items.map(({ path, label, icon: Icon }, index) => <Link key={path} to={path} tabIndex={menuOpen ? 0 : -1} className={cn("nav-link", location.pathname === path && "nav-link-active")}><Icon size={19} aria-hidden="true" /><span>{label}</span><small>{String(index + 1).padStart(2, "0")}</small></Link>)}
+      <nav className="main-nav" aria-label="主导航">
+        <span className="nav-caption">{user.role === "ADMIN" ? "管理空间" : "阅读空间"}</span>
+        {items.map(([path, label, number]) => <Link key={path} to={path} onClick={() => setMenuOpen(false)} className={cn("nav-link", location.pathname === path && "nav-link-active")}><span className="nav-number">{number}</span>{label}</Link>)}
       </nav>
-      <div className="drawer-identity"><div className="identity-mini"><span className="avatar">{user.name.slice(0, 1)}</span><span><strong>{user.name}</strong><small>{user.role === "ADMIN" ? "管理员" : user.student_id}</small></span></div><button className="logout-link" onClick={logout}><SignOut size={17} />退出登录</button></div>
+      <div className="sidebar-bottom"><div className="identity-mini"><span className="avatar">{user.name.slice(0, 1)}</span><span><strong>{user.name}</strong><small>{user.role === "ADMIN" ? "管理员" : user.student_id}</small></span></div><button className="logout-link" onClick={logout}>退出登录</button></div>
     </aside>
-    <div className="main-column">
-      <main className="content"><Outlet /></main>
-    </div>
+    <div className="main-column"><header className="topbar"><button className="menu-toggle" aria-label="打开菜单" onClick={() => setMenuOpen((value) => !value)}>☰</button><div className="topbar-context"><span className="context-mark">LIBRARY / {gateway.mode.toUpperCase()}</span><span className="context-date">演示基准日 {DEMO_DATE}</span></div><div className="topbar-user"><span className="online-dot" />{user.name}<span className="role-label">{user.role === "ADMIN" ? "ADMIN" : "READER"}</span></div></header><main className="content"><Outlet /></main></div>
   </div>;
 }
 
@@ -171,27 +95,17 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const submit = async (event: FormEvent) => { event.preventDefault(); setLoading(true); setError(null); try { const response = await gateway.login(username, password); const user = await gateway.me(); setUser(user); toast(`欢迎回来，${response.user.name}`, "success"); navigate(response.user.role === "ADMIN" ? "/admin/overview" : "/catalog"); } catch (value) { setError(value); } finally { setLoading(false); } };
   const fill = (role: "admin" | "reader") => { setUsername(role === "admin" ? "admin" : "DEMO-S001"); setPassword(role === "admin" ? "admin123" : "demo123"); setError(null); };
-  return <div className="login-page">
-    <div className="page-background" aria-hidden="true" />
-    <div className="pointer-light" aria-hidden="true" />
-    <div className="login-visual-watermark" aria-hidden="true">{Array.from({ length: 16 }, (_, index) => <span key={index}>202314109方昕哲制作 · 20260831</span>)}</div>
-    <div className="login-visual">
-      <div className="login-brand-pill glass-interactive"><Brand compact /><span>课程项目</span></div>
-      <div className="login-copy"><span className="eyebrow">CAMPUS LIBRARY / 01</span><h1>把借阅办得<br /><em>更清楚。</em></h1><p>围绕图书、读者和借还书流程设计的校园图书管理系统。</p><div className="login-facts"><span><Books size={16} />15 本样例图书</span><span><Users size={16} />8 名读者</span><span><BookBookmark size={16} />30 天借期</span></div></div>
-      <div className="login-visual-footer"><span className="login-credit">202314109方昕哲制作 · 20260831</span><br />Liquid Glass inspired interface<br />Designed for course demonstration</div>
-    </div>
-    <div className="login-card-wrap"><form className="login-card glass-interactive" onSubmit={submit}><Brand /><div className="login-heading"><span className="eyebrow">SECURE ACCESS</span><h2>欢迎回来</h2><p>{gateway.mode === "demo" ? "选择演示身份，进入图书馆工作台" : "使用后端账号登录系统"}</p></div><ErrorBanner error={error} /><label className="field"><span>登录账号 / 学号</span><input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required placeholder="admin 或 DEMO-S001" /></label><label className="field"><span>密码</span><input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required placeholder="请输入密码" /></label><Button type="submit" disabled={loading} className="button-wide">{loading ? "正在验证…" : <><span>登录系统</span><ArrowRight size={17} /></>}</Button>{gateway.mode === "demo" && <div className="demo-accounts"><span className="field-label">快速进入演示</span><div><button className="glass-interactive" type="button" onClick={() => fill("admin")}><span><UserCircle size={17} />管理员演示</span><small>admin</small></button><button className="glass-interactive" type="button" onClick={() => fill("reader")}><span><BookOpen size={17} />读者演示</span><small>DEMO-S001</small></button></div></div>}<p className="login-note">演示数据仅用于本课程展示，不包含真实个人信息。</p></form></div>
-  </div>;
+  return <div className="login-page"><div className="login-visual"><div className="login-visual-watermark" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <span key={index}>202314109方昕哲制作 · 20260831</span>)}</div><div className="login-orbit orbit-one" /><div className="login-orbit orbit-two" /><div className="login-copy"><span className="eyebrow">CAMPUS LIBRARY / 01</span><h1>把借阅办得<br /><em>更清楚。</em></h1><p>一个围绕图书、读者和借还书流程设计的校园图书管理系统。</p><div className="login-facts"><span>15 本样例图书</span><span>8 名读者</span><span>30 天借期</span></div></div><div className="login-visual-footer"><span className="login-credit">202314109方昕哲制作 · 20260831</span><br />Material 3 inspired interface<br />Designed for course demonstration</div></div><div className="login-card-wrap"><form className="login-card" onSubmit={submit}><div className="brand brand-login"><span className="brand-symbol">+</span><span><strong>Campus Library</strong><small>校园图书馆</small></span></div><div className="login-heading"><h2>欢迎回来</h2><p>{gateway.mode === "demo" ? "选择一个演示身份开始操作" : "使用后端账号登录系统"}</p></div><ErrorBanner error={error} /><label className="field"><span>登录账号 / 学号</span><input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required placeholder="admin 或 DEMO-S001" /></label><label className="field"><span>密码</span><input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required placeholder="请输入密码" /></label><Button type="submit" disabled={loading} className="button-wide">{loading ? "正在验证…" : "登录系统 →"}</Button>{gateway.mode === "demo" && <div className="demo-accounts"><span className="field-label">快速进入演示</span><div><button type="button" onClick={() => fill("admin")}>管理员演示 <small>admin</small></button><button type="button" onClick={() => fill("reader")}>读者演示 <small>DEMO-S001</small></button></div></div>}<p className="login-note">演示数据仅用于本课程展示，不包含真实个人信息。</p></form></div></div>;
 }
 
 function AdminGuard({ children }: { children: ReactNode }) { const { user } = useApp(); return user?.role === "ADMIN" ? <>{children}</> : <Navigate to="/catalog" replace />; }
 function ReaderGuard({ children }: { children: ReactNode }) { const { user } = useApp(); return user?.role === "READER" ? <>{children}</> : <Navigate to="/admin/overview" replace />; }
 
 function OverviewPage() {
-  const { gateway, version, user } = useApp();
+  const { gateway, version } = useApp();
   const [stats, setStats] = useState<DashboardStats | null>(null); const [loans, setLoans] = useState<Loan[]>([]); const [error, setError] = useState<unknown>(null);
-  useEffect(() => { let alive = true; setError(null); Promise.all([gateway.stats(), gateway.listLoans({ page_size: 4 })]).then(([nextStats, nextLoans]) => { if (alive) { setStats(nextStats); setLoans(nextLoans.items); } }).catch((value) => alive && setError(value)); return () => { alive = false; }; }, [gateway, version]);
-  return <><PageHeader eyebrow="OVERVIEW / 总览" title="今天的图书馆" detail="查看馆藏状态、借阅活动和需要处理的事项。" meta={<><UserCircle size={15} /><span>{user?.name || "演示管理员"}</span><i>·</i><span>{DEMO_DATE}</span></>} actions={<><Link className="button button-tonal glass-interactive" to="/admin/loans">办理借阅<ArrowRight size={16} /></Link><Link className="button button-primary glass-interactive" to="/admin/books?new=1"><Plus size={17} weight="bold" />新增图书</Link></>} /><ErrorBanner error={error} />{!stats ? <LoadingRows count={2} /> : <><div className="stat-grid content-surface"><StatCard label="在馆书目" value={stats.total_books} note="种在用图书" tone="blue" /><StatCard label="馆藏册数" value={stats.total_copies} note="全部馆藏" tone="purple" /><StatCard label="在借数量" value={stats.active_loans} note="当前借阅中" tone="green" /><StatCard label="读者人数" value={stats.total_readers} note="活跃读者" tone="amber" /><div className="metric-strip"><span><b>{stats.available_copies}</b> 可借册数</span><span><b className={stats.overdue_loans ? "text-danger" : ""}>{stats.overdue_loans}</b> 逾期借阅</span><span><b>¥{stats.unpaid_fines}</b> 已登记未缴罚款</span></div></div><div className="two-column"><Panel title="最近借阅" detail="按最新借阅记录排序" actions={<Link className="text-link" to="/admin/loans">查看全部<ArrowRight size={14} /></Link>}>{loans.length ? <LoanList loans={loans} compact /> : <EmptyState title="还没有借阅记录" />}</Panel><Panel title="快速操作" detail="常用管理入口"><div className="quick-actions"><Link className="glass-interactive" to="/admin/books?new=1"><span className="quick-icon blue"><Plus size={21} /></span><span><strong>录入新图书</strong><small>添加书名、ISBN 和库存</small></span><ArrowRight size={17} /></Link><Link className="glass-interactive" to="/admin/readers?new=1"><span className="quick-icon green"><UserPlus size={21} /></span><span><strong>创建读者账户</strong><small>设置学号和借阅上限</small></span><ArrowRight size={17} /></Link><Link className="glass-interactive" to="/admin/data"><span className="quick-icon amber"><UploadSimple size={21} /></span><span><strong>导入或导出文件</strong><small>使用课程规定的 CSV 格式</small></span><ArrowRight size={17} /></Link></div></Panel></div></>}</>;
+  useEffect(() => { let alive = true; setError(null); Promise.all([gateway.stats(), gateway.listLoans({ page_size: 6 })]).then(([nextStats, nextLoans]) => { if (alive) { setStats(nextStats); setLoans(nextLoans.items); } }).catch((value) => alive && setError(value)); return () => { alive = false; }; }, [gateway, version]);
+  return <><PageHeader eyebrow="OVERVIEW / 总览" title="今天的图书馆" detail="查看馆藏状态、借阅活动和需要处理的事项。" actions={<><Link className="button button-tonal" to="/admin/loans">办理借阅</Link><Link className="button button-primary" to="/admin/books?new=1">新增图书 <span>＋</span></Link></>} /><ErrorBanner error={error} />{!stats ? <LoadingRows count={2} /> : <><div className="stat-grid"><StatCard label="在馆书目" value={stats.total_books} note="种在用图书" tone="blue" /><StatCard label="馆藏册数" value={stats.total_copies} note="全部馆藏" tone="purple" /><StatCard label="在借数量" value={stats.active_loans} note="当前借阅中" tone="green" /><StatCard label="读者人数" value={stats.total_readers} note="活跃读者" tone="amber" /></div><div className="metric-strip"><span><b>{stats.available_copies}</b> 可借册数</span><span><b className={stats.overdue_loans ? "text-danger" : ""}>{stats.overdue_loans}</b> 逾期借阅</span><span><b>¥{stats.unpaid_fines}</b> 已登记未缴罚款</span></div><div className="two-column"><Panel title="最近借阅" detail="按最新借阅记录排序" actions={<Link className="text-link" to="/admin/loans">查看全部 →</Link>}>{loans.length ? <LoanList loans={loans} compact /> : <EmptyState title="还没有借阅记录" />}</Panel><Panel title="快速操作" detail="常用管理入口"><div className="quick-actions"><Link to="/admin/books?new=1"><span className="quick-icon blue">＋</span><span><strong>录入新图书</strong><small>添加书名、ISBN 和库存</small></span><b>→</b></Link><Link to="/admin/readers?new=1"><span className="quick-icon green">◎</span><span><strong>创建读者账户</strong><small>设置学号和借阅上限</small></span><b>→</b></Link><Link to="/admin/data"><span className="quick-icon amber">↥</span><span><strong>导入或导出文件</strong><small>使用课程规定的 CSV 格式</small></span><b>→</b></Link></div></Panel></div></>}</>;
 }
 
 function BookForm({ initial, onClose, onSaved }: { initial?: Book | null; onClose: () => void; onSaved: (payload: BookPayload, id?: number) => Promise<void> }) {
@@ -199,7 +113,7 @@ function BookForm({ initial, onClose, onSaved }: { initial?: Book | null; onClos
   const [error, setError] = useState<unknown>(null); const [saving, setSaving] = useState(false);
   const change = (key: keyof BookPayload, value: string) => setForm((current) => ({ ...current, [key]: key === "total_quantity" ? Math.max(0, Number(value) || 0) : value }));
   const submit = async (event: FormEvent) => { event.preventDefault(); setSaving(true); setError(null); try { await onSaved(form, initial?.id); } catch (value) { setError(value); } finally { setSaving(false); } };
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="book-form-title"><div className="modal-heading"><div><span className="eyebrow">BOOK RECORD / {initial ? "EDIT" : "NEW"}</span><h2 id="book-form-title">{initial ? "修改图书信息" : "新增图书"}</h2></div><button className="close-button glass-interactive" onClick={onClose} aria-label="关闭"><X size={18} /></button></div><ErrorBanner error={error} /><form onSubmit={submit}><div className="form-grid"><label className="field field-span"><span>书名</span><input value={form.title} onChange={(event) => change("title", event.target.value)} required autoFocus /></label><label className="field"><span>作者</span><input value={form.author} onChange={(event) => change("author", event.target.value)} required /></label><label className="field"><span>ISBN</span><input value={form.isbn} onChange={(event) => change("isbn", event.target.value)} required /></label><label className="field"><span>出版社</span><input value={form.publisher} onChange={(event) => change("publisher", event.target.value)} required /></label><label className="field"><span>分类</span><input value={form.category} onChange={(event) => change("category", event.target.value)} required /></label><label className="field"><span>定价（元）</span><input inputMode="decimal" value={form.price} onChange={(event) => change("price", event.target.value)} required /></label><label className="field"><span>入库数量</span><input type="number" min="0" value={form.total_quantity} onChange={(event) => change("total_quantity", event.target.value)} required /></label></div><div className="modal-footer"><Button variant="quiet" onClick={onClose}>取消</Button><Button type="submit" disabled={saving}>{saving ? "保存中…" : initial ? "保存修改" : "创建图书"}</Button></div></form></div></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="book-form-title"><div className="modal-heading"><div><span className="eyebrow">BOOK RECORD / {initial ? "EDIT" : "NEW"}</span><h2 id="book-form-title">{initial ? "修改图书信息" : "新增图书"}</h2></div><button className="close-button" onClick={onClose} aria-label="关闭">×</button></div><ErrorBanner error={error} /><form onSubmit={submit}><div className="form-grid"><label className="field field-span"><span>书名</span><input value={form.title} onChange={(event) => change("title", event.target.value)} required autoFocus /></label><label className="field"><span>作者</span><input value={form.author} onChange={(event) => change("author", event.target.value)} required /></label><label className="field"><span>ISBN</span><input value={form.isbn} onChange={(event) => change("isbn", event.target.value)} required /></label><label className="field"><span>出版社</span><input value={form.publisher} onChange={(event) => change("publisher", event.target.value)} required /></label><label className="field"><span>分类</span><input value={form.category} onChange={(event) => change("category", event.target.value)} required /></label><label className="field"><span>定价（元）</span><input inputMode="decimal" value={form.price} onChange={(event) => change("price", event.target.value)} required /></label><label className="field"><span>入库数量</span><input type="number" min="0" value={form.total_quantity} onChange={(event) => change("total_quantity", event.target.value)} required /></label></div><div className="modal-footer"><Button variant="quiet" onClick={onClose}>取消</Button><Button type="submit" disabled={saving}>{saving ? "保存中…" : initial ? "保存修改" : "创建图书"}</Button></div></form></div></div>;
 }
 
 function BookCard({ book, admin, onEdit, onDelete }: { book: Book; admin?: boolean; onEdit?: () => void; onDelete?: () => void }) {
@@ -214,7 +128,7 @@ function BooksPage() {
   const books = (data?.items || []).filter((book) => showInactive || book.is_active);
   const save = async (payload: BookPayload, id?: number) => { if (id) { await gateway.updateBook(id, payload); toast("图书信息已更新", "success"); } else { await gateway.createBook(payload); toast("新图书已录入", "success"); } setEditing(undefined); reload(); };
   const remove = async (book: Book) => { if (!window.confirm(`确认停用《${book.title}》吗？历史借阅记录会保留。`)) return; try { await gateway.deleteBook(book.id); toast("图书已停用，历史记录仍然保留", "success"); reload(); } catch (value) { setError(value); } };
-  return <><PageHeader eyebrow={admin ? "CATALOG / ADMIN" : "CATALOG / DISCOVER"} title={admin ? "图书管理" : "发现一本书"} detail={admin ? `${data?.total ?? "—"} 条记录 · 已下架记录会保留在管理员表格中` : "按书名、作者、ISBN 或分类检索馆藏。"} actions={admin ? <><Button variant="tonal" onClick={() => setShowInactive((value) => !value)}>{showInactive ? "隐藏已下架" : "显示已下架"}</Button><Button onClick={() => setEditing(null)}><Plus size={17} />新增图书</Button></> : undefined} /><Panel className="search-panel"><div className="search-row"><label className="search-box"><MagnifyingGlass size={18} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void load()} placeholder="输入关键词…" aria-label="图书关键词" /></label><select value={criterion} onChange={(event) => setCriterion(event.target.value as typeof criterion)} aria-label="查询字段"><option value="title">按书名</option><option value="author">按作者</option><option value="isbn">按 ISBN</option><option value="category">按分类</option><option value="book_code">按图书编号</option></select><Button variant="tonal" onClick={() => void load()} disabled={searching}>{searching ? "查询中…" : "查询"}</Button></div></Panel><ErrorBanner error={error} />{!data ? <LoadingRows count={4} /> : books.length ? <div className="book-grid">{books.map((book) => <BookCard key={book.id} book={book} admin={admin} onEdit={() => setEditing(book)} onDelete={() => void remove(book)} />)}</div> : <EmptyState title="没有找到图书" detail="调整关键词或切换查询字段后再试。" />} {editing !== undefined && <BookForm initial={editing} onClose={() => setEditing(undefined)} onSaved={save} />}</>;
+  return <><PageHeader eyebrow={admin ? "CATALOG / ADMIN" : "CATALOG / DISCOVER"} title={admin ? "图书管理" : "发现一本书"} detail={admin ? `${data?.total ?? "—"} 条记录 · 已下架记录会保留在管理员表格中` : "按书名、作者、ISBN 或分类检索馆藏。"} actions={admin ? <><Button variant="tonal" onClick={() => setShowInactive((value) => !value)}>{showInactive ? "隐藏已下架" : "显示已下架"}</Button><Button onClick={() => setEditing(null)}>＋ 新增图书</Button></> : undefined} /><Panel className="search-panel"><div className="search-row"><label className="search-box"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void load()} placeholder="输入关键词…" aria-label="图书关键词" /></label><select value={criterion} onChange={(event) => setCriterion(event.target.value as typeof criterion)} aria-label="查询字段"><option value="title">按书名</option><option value="author">按作者</option><option value="isbn">按 ISBN</option><option value="category">按分类</option><option value="book_code">按图书编号</option></select><Button variant="tonal" onClick={() => void load()} disabled={searching}>{searching ? "查询中…" : "查询"}</Button></div></Panel><ErrorBanner error={error} />{!data ? <LoadingRows count={4} /> : books.length ? <div className="book-grid">{books.map((book) => <BookCard key={book.id} book={book} admin={admin} onEdit={() => setEditing(book)} onDelete={() => void remove(book)} />)}</div> : <EmptyState title="没有找到图书" detail="调整关键词或切换查询字段后再试。" />} {editing !== undefined && <BookForm initial={editing} onClose={() => setEditing(undefined)} onSaved={save} />}</>;
 }
 
 function BookDetailPage() {
@@ -223,14 +137,14 @@ function BookDetailPage() {
   const borrow = async () => { if (!book) return; setBorrowing(true); try { await gateway.borrow({ book_id: book.id }); toast("借阅已创建，应还日期为 30 天后", "success"); reload(); } catch (value) { setError(value); } finally { setBorrowing(false); } };
   if (error) return <><PageHeader title="图书详情" /><ErrorBanner error={error} /></>;
   if (!book) return <LoadingRows count={2} />;
-  return <><PageHeader eyebrow="BOOK DETAIL" title={book.title} detail={`${book.author} · ${book.publisher || "未填写出版社"}`} actions={<Link to={user?.role === "ADMIN" ? "/admin/books" : "/catalog"} className="button button-quiet glass-interactive"><ArrowLeft size={16} />返回目录</Link>} /><div className="detail-layout"><div className="detail-cover book-cover"><span>{book.title.slice(0, 1)}</span><small>{book.category || "未分类"}</small></div><Panel title="图书信息" detail={`编号 ${book.book_code}`}><dl className="detail-list"><div><dt>ISBN</dt><dd>{book.isbn}</dd></div><div><dt>分类</dt><dd>{book.category || "未分类"}</dd></div><div><dt>定价</dt><dd>¥{book.price}</dd></div><div><dt>库存</dt><dd>{book.available_quantity} / {book.total_quantity} 册可借</dd></div></dl><div className="detail-actions">{book.is_active && user?.role === "READER" && <Button onClick={() => void borrow()} disabled={borrowing || !book.available_quantity}>{borrowing ? "办理中…" : book.available_quantity ? "借阅这本书" : "暂无可借库存"}</Button>}{!book.is_active && <StatusPill>这本书已下架</StatusPill>}</div></Panel></div></>;
+  return <><PageHeader eyebrow="BOOK DETAIL" title={book.title} detail={`${book.author} · ${book.publisher || "未填写出版社"}`} actions={<Link to={user?.role === "ADMIN" ? "/admin/books" : "/catalog"} className="button button-quiet">← 返回目录</Link>} /><div className="detail-layout"><div className="detail-cover book-cover"><span>{book.title.slice(0, 1)}</span><small>{book.category || "未分类"}</small></div><Panel title="图书信息" detail={`编号 ${book.book_code}`}><dl className="detail-list"><div><dt>ISBN</dt><dd>{book.isbn}</dd></div><div><dt>分类</dt><dd>{book.category || "未分类"}</dd></div><div><dt>定价</dt><dd>¥{book.price}</dd></div><div><dt>库存</dt><dd>{book.available_quantity} / {book.total_quantity} 册可借</dd></div></dl><div className="detail-actions">{book.is_active && user?.role === "READER" && <Button onClick={() => void borrow()} disabled={borrowing || !book.available_quantity}>{borrowing ? "办理中…" : book.available_quantity ? "借阅这本书" : "暂无可借库存"}</Button>}{!book.is_active && <StatusPill>这本书已下架</StatusPill>}</div></Panel></div></>;
 }
 
 function ReaderForm({ initial, onClose, onSaved }: { initial?: User | null; onClose: () => void; onSaved: (payload: ReaderPayload, id?: number) => Promise<void> }) {
   const [form, setForm] = useState<ReaderPayload>({ name: initial?.name || "", student_id: initial?.student_id || "", contact: initial?.contact || "", borrow_limit: initial?.borrow_limit || 5, password: "" }); const [error, setError] = useState<unknown>(null); const [saving, setSaving] = useState(false);
   const change = (key: keyof ReaderPayload, value: string) => setForm((current) => ({ ...current, [key]: key === "borrow_limit" ? Math.max(1, Number(value) || 1) : value }));
   const submit = async (event: FormEvent) => { event.preventDefault(); setSaving(true); setError(null); try { const payload = initial ? (({ password: _password, ...fields }) => fields)(form) : form; await onSaved(payload, initial?.id); } catch (value) { setError(value); } finally { setSaving(false); } };
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}><div className="modal" role="dialog" aria-modal="true"><div className="modal-heading"><div><span className="eyebrow">READER ACCOUNT / {initial ? "EDIT" : "NEW"}</span><h2>{initial ? "修改读者信息" : "创建读者账户"}</h2></div><button className="close-button glass-interactive" onClick={onClose} aria-label="关闭"><X size={18} /></button></div><ErrorBanner error={error} /><form onSubmit={submit}><div className="form-grid"><label className="field"><span>姓名</span><input value={form.name} onChange={(event) => change("name", event.target.value)} required autoFocus /></label><label className="field"><span>学号</span><input value={form.student_id} onChange={(event) => change("student_id", event.target.value)} required /></label><label className="field"><span>联系方式</span><input value={form.contact} onChange={(event) => change("contact", event.target.value)} required /></label><label className="field"><span>借阅上限</span><input type="number" min="1" value={form.borrow_limit} onChange={(event) => change("borrow_limit", event.target.value)} required /></label>{!initial && <label className="field field-span"><span>初始密码</span><input type="password" value={form.password} onChange={(event) => change("password", event.target.value)} required /></label>}</div><div className="modal-footer"><Button variant="quiet" onClick={onClose}>取消</Button><Button type="submit" disabled={saving}>{saving ? "保存中…" : initial ? "保存修改" : "创建账户"}</Button></div></form></div></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}><div className="modal" role="dialog" aria-modal="true"><div className="modal-heading"><div><span className="eyebrow">READER ACCOUNT / {initial ? "EDIT" : "NEW"}</span><h2>{initial ? "修改读者信息" : "创建读者账户"}</h2></div><button className="close-button" onClick={onClose} aria-label="关闭">×</button></div><ErrorBanner error={error} /><form onSubmit={submit}><div className="form-grid"><label className="field"><span>姓名</span><input value={form.name} onChange={(event) => change("name", event.target.value)} required autoFocus /></label><label className="field"><span>学号</span><input value={form.student_id} onChange={(event) => change("student_id", event.target.value)} required /></label><label className="field"><span>联系方式</span><input value={form.contact} onChange={(event) => change("contact", event.target.value)} required /></label><label className="field"><span>借阅上限</span><input type="number" min="1" value={form.borrow_limit} onChange={(event) => change("borrow_limit", event.target.value)} required /></label>{!initial && <label className="field field-span"><span>初始密码</span><input type="password" value={form.password} onChange={(event) => change("password", event.target.value)} required /></label>}</div><div className="modal-footer"><Button variant="quiet" onClick={onClose}>取消</Button><Button type="submit" disabled={saving}>{saving ? "保存中…" : initial ? "保存修改" : "创建账户"}</Button></div></form></div></div>;
 }
 
 function ReadersPage() {
@@ -240,11 +154,11 @@ function ReadersPage() {
   const save = async (payload: ReaderPayload, id?: number) => { if (id) { await gateway.updateReader(id, payload); toast("读者信息已更新", "success"); } else { await gateway.createReader(payload); toast("读者账户已创建", "success"); } setEditing(undefined); reload(); };
   const remove = async (reader: User) => { if (!window.confirm(`确认注销 ${reader.name}（${reader.student_id}）吗？`)) return; try { await gateway.deleteReader(reader.id); toast("读者已注销", "success"); reload(); } catch (value) { setError(value); } };
   const filtered = (readers || []).filter((reader) => !query || [reader.name, reader.student_id, reader.contact].some((value) => value?.toLowerCase().includes(query.toLowerCase())));
-  return <><PageHeader eyebrow="PEOPLE / ADMIN" title="读者管理" detail="创建账户、设置借阅上限并处理账户状态。" actions={<Button onClick={() => setEditing(null)}><UserPlus size={17} />创建读者</Button>} /><Panel className="search-panel"><div className="search-row"><label className="search-box"><MagnifyingGlass size={18} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索姓名、学号或联系方式" /></label><span className="result-count">{readers ? `${filtered.length} 名读者` : "正在读取…"}</span></div></Panel><ErrorBanner error={error} />{!readers ? <LoadingRows count={5} /> : filtered.length ? <Panel className="table-panel"><div className="data-table-wrap"><table className="data-table"><thead><tr><th>读者</th><th>联系方式</th><th>借阅上限</th><th>状态</th><th>操作</th></tr></thead><tbody>{filtered.map((reader) => <tr key={reader.id}><td><div className="table-person"><span className="avatar avatar-small">{reader.name.slice(0, 1)}</span><span><strong>{reader.name}</strong><small>{reader.student_id}</small></span></div></td><td>{reader.contact || "—"}</td><td>{reader.borrow_limit} 本</td><td><StatusPill tone={reader.is_active ? "success" : "neutral"}>{reader.is_active ? "正常" : "已注销"}</StatusPill></td><td><span className="row-actions"><button onClick={() => setEditing(reader)} disabled={!reader.is_active}>编辑</button><button onClick={() => void remove(reader)} disabled={!reader.is_active}>注销</button></span></td></tr>)}</tbody></table></div></Panel> : <EmptyState title="没有匹配读者" />} {editing !== undefined && <ReaderForm initial={editing} onClose={() => setEditing(undefined)} onSaved={save} />}</>;
+  return <><PageHeader eyebrow="PEOPLE / ADMIN" title="读者管理" detail="创建账户、设置借阅上限并处理账户状态。" actions={<Button onClick={() => setEditing(null)}>＋ 创建读者</Button>} /><Panel className="search-panel"><div className="search-row"><label className="search-box"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索姓名、学号或联系方式" /></label><span className="result-count">{readers ? `${filtered.length} 名读者` : "正在读取…"}</span></div></Panel><ErrorBanner error={error} />{!readers ? <LoadingRows count={5} /> : filtered.length ? <Panel className="table-panel"><div className="data-table-wrap"><table className="data-table"><thead><tr><th>读者</th><th>联系方式</th><th>借阅上限</th><th>状态</th><th>操作</th></tr></thead><tbody>{filtered.map((reader) => <tr key={reader.id}><td><div className="table-person"><span className="avatar avatar-small">{reader.name.slice(0, 1)}</span><span><strong>{reader.name}</strong><small>{reader.student_id}</small></span></div></td><td>{reader.contact || "—"}</td><td>{reader.borrow_limit} 本</td><td><StatusPill tone={reader.is_active ? "success" : "neutral"}>{reader.is_active ? "正常" : "已注销"}</StatusPill></td><td><span className="row-actions"><button onClick={() => setEditing(reader)} disabled={!reader.is_active}>编辑</button><button onClick={() => void remove(reader)} disabled={!reader.is_active}>注销</button></span></td></tr>)}</tbody></table></div></Panel> : <EmptyState title="没有匹配读者" />} {editing !== undefined && <ReaderForm initial={editing} onClose={() => setEditing(undefined)} onSaved={save} />}</>;
 }
 
 function LoanList({ loans, compact = false, onReturn, onPayFine }: { loans: Loan[]; compact?: boolean; onReturn?: (loan: Loan) => void; onPayFine?: (loan: Loan) => void }) {
-  return <div className={cn("loan-list", compact && "loan-list-compact")}>{loans.map((loan) => <div className="loan-row" key={loan.id}><div className="loan-symbol">{loan.status === "BORROWED" ? <ArrowUpRight size={17} /> : <Check size={17} weight="bold" />}</div><div className="loan-main"><strong>{loan.book_title}</strong><span>{loan.loan_no} · {loan.reader_name} · 借于 {formatDate(loan.borrow_date)}</span></div><div className="loan-dates"><span>应还 {formatDate(loan.due_date)}</span>{loan.status === "RETURNED" ? <StatusPill tone="success">已归还</StatusPill> : loan.overdue_days > 0 ? <StatusPill tone="danger">逾期 {loan.overdue_days} 天</StatusPill> : <StatusPill tone="blue">借阅中</StatusPill>}</div>{!compact && <div className="row-actions">{loan.status === "BORROWED" && onReturn && <button onClick={() => onReturn(loan)}>归还</button>}{loan.status === "RETURNED" && loan.fine_status === "UNPAID" && onPayFine && <button onClick={() => onPayFine(loan)}>登记已缴</button>}</div>}</div>)}</div>;
+  return <div className={cn("loan-list", compact && "loan-list-compact")}>{loans.map((loan) => <div className="loan-row" key={loan.id}><div className="loan-symbol">{loan.status === "BORROWED" ? "↗" : "✓"}</div><div className="loan-main"><strong>{loan.book_title}</strong><span>{loan.loan_no} · {loan.reader_name} · 借于 {formatDate(loan.borrow_date)}</span></div><div className="loan-dates"><span>应还 {formatDate(loan.due_date)}</span>{loan.status === "RETURNED" ? <StatusPill tone="success">已归还</StatusPill> : loan.overdue_days > 0 ? <StatusPill tone="danger">逾期 {loan.overdue_days} 天</StatusPill> : <StatusPill tone="blue">借阅中</StatusPill>}</div>{!compact && <div className="row-actions">{loan.status === "BORROWED" && onReturn && <button onClick={() => onReturn(loan)}>归还</button>}{loan.status === "RETURNED" && loan.fine_status === "UNPAID" && onPayFine && <button onClick={() => onPayFine(loan)}>登记已缴</button>}</div>}</div>)}</div>;
 }
 
 function LoansPage() {
@@ -263,7 +177,7 @@ function ProfilePage() {
 }
 
 function ReceiptPage() {
-  const { loanId } = useParams(); const { gateway, user } = useApp(); const [loan, setLoan] = useState<Loan | null>(null); const [error, setError] = useState<unknown>(null); useEffect(() => { if (loanId) gateway.getLoan(Number(loanId)).then(setLoan).catch(setError); }, [gateway, loanId]); if (error) return <><PageHeader title="借阅凭单" /><ErrorBanner error={error} /></>; if (!loan) return <LoadingRows count={2} />; const backPath = user?.role === "ADMIN" ? "/admin/loans" : "/my-loans"; return <><PageHeader eyebrow="LOAN RECEIPT" title="借阅凭单" detail="这份凭单可以直接打印或保存为 PDF。" actions={<><button className="button button-tonal glass-interactive" onClick={() => window.print()}><Printer size={16} />打印凭单</button><Link to={backPath} className="button button-quiet glass-interactive"><ArrowLeft size={16} />返回借阅</Link></>} /><div className="receipt"><div className="receipt-top"><Brand /><span className="receipt-status">{loan.status === "RETURNED" ? "RETURNED" : "BORROWED"}</span></div><div className="receipt-number"><span>借阅编号</span><strong>{loan.loan_no}</strong></div><div className="receipt-grid"><div><span>读者</span><strong>{loan.reader_name}</strong><small>{loan.student_id}</small></div><div><span>图书</span><strong>{loan.book_title}</strong><small>{loan.book_code} · {loan.isbn}</small></div><div><span>借阅日期</span><strong>{formatDate(loan.borrow_date)}</strong></div><div><span>应还日期</span><strong>{formatDate(loan.due_date)}</strong></div></div><div className="receipt-note">{loan.overdue_days ? `当前逾期 ${loan.overdue_days} 天，预计罚款 ¥${loan.fine_amount}` : "请在应还日期前归还图书。"}</div></div></>;
+  const { loanId } = useParams(); const { gateway, user } = useApp(); const [loan, setLoan] = useState<Loan | null>(null); const [error, setError] = useState<unknown>(null); useEffect(() => { if (loanId) gateway.getLoan(Number(loanId)).then(setLoan).catch(setError); }, [gateway, loanId]); if (error) return <><PageHeader title="借阅凭单" /><ErrorBanner error={error} /></>; if (!loan) return <LoadingRows count={2} />; const backPath = user?.role === "ADMIN" ? "/admin/loans" : "/my-loans"; return <><PageHeader eyebrow="LOAN RECEIPT" title="借阅凭单" detail="这份凭单可以直接打印或保存为 PDF。" actions={<><button className="button button-tonal" onClick={() => window.print()}>打印凭单</button><Link to={backPath} className="button button-quiet">返回借阅</Link></>} /><div className="receipt"><div className="receipt-top"><div className="brand"><span className="brand-symbol">+</span><span><strong>Campus Library</strong><small>校园图书馆</small></span></div><span className="receipt-status">{loan.status === "RETURNED" ? "RETURNED" : "BORROWED"}</span></div><div className="receipt-number"><span>借阅编号</span><strong>{loan.loan_no}</strong></div><div className="receipt-grid"><div><span>读者</span><strong>{loan.reader_name}</strong><small>{loan.student_id}</small></div><div><span>图书</span><strong>{loan.book_title}</strong><small>{loan.book_code} · {loan.isbn}</small></div><div><span>借阅日期</span><strong>{formatDate(loan.borrow_date)}</strong></div><div><span>应还日期</span><strong>{formatDate(loan.due_date)}</strong></div></div><div className="receipt-note">{loan.overdue_days ? `当前逾期 ${loan.overdue_days} 天，预计罚款 ¥${loan.fine_amount}` : "请在应还日期前归还图书。"}</div></div></>;
 }
 
 function AnalyticsPage() {
@@ -275,13 +189,12 @@ function DataPage() {
   const selectFile = async (value: File | null) => { setFile(value); setResult(null); setError(null); if (value) setPreview((await value.text()).split(/\r?\n/).filter(Boolean).slice(0, 8)); else setPreview([]); };
   const importFile = async () => { if (!file) return; setLoading(true); setError(null); try { const next = await gateway.importBooks(file); setResult(next); if (!next.errors.length) toast(`成功导入 ${next.success} 条图书记录`, "success"); } catch (value) { setError(value); } finally { setLoading(false); } };
   const exportFile = async (kind: "books" | "readers" | "loans") => { try { const blob = await gateway.exportCsv(kind); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${kind}.csv`; anchor.click(); URL.revokeObjectURL(url); toast(`${kind}.csv 已生成`, "success"); } catch (value) { setError(value); } };
-  return <><PageHeader eyebrow="FILES / ADMIN" title="导入与导出" detail="使用 UTF-8 CSV 处理数据，导入会在后端整批校验。" /><ErrorBanner error={error} /><div className="data-grid"><Panel title="导入图书 CSV" detail="表头：title, author, isbn, publisher, price, total_quantity, category"><label className="drop-zone glass-interactive"><input type="file" accept=".csv,text/csv" onChange={(event) => void selectFile(event.target.files?.[0] || null)} /><span className="drop-icon"><UploadSimple size={22} /></span><strong>{file ? file.name : "选择一个 CSV 文件"}</strong><small>最大 2 MiB · 最多 1,000 行</small></label>{file && <><div className="file-meta"><span>{(file.size / 1024).toFixed(1)} KB</span><span>{preview.length > 1 ? `已预览 ${preview.length - 1} 行` : "空文件"}</span></div><Button onClick={() => void importFile()} disabled={loading}>{loading ? "校验并导入中…" : "确认导入"}</Button></>}{result && <div className={cn("import-result", result.errors.length ? "import-failed" : "import-success")}><strong>{result.errors.length ? "导入未提交" : "导入完成"}</strong><span>总行数 {result.total} · 成功 {result.success} · 问题行 {result.failed}</span>{result.errors.length > 0 && <ul>{result.errors.slice(0, 8).map((item) => <li key={`${item.row}-${item.reason}`}>第 {item.row} 行：{item.reason}</li>)}</ul>}</div>}</Panel><Panel title="导出数据" detail="下载的 CSV 可以用于报告中的文件写出证据。"><div className="export-list"><button className="glass-interactive" onClick={() => void exportFile("books")}><span className="file-icon"><Books size={18} /></span><span><strong>图书目录</strong><small>books.csv · 含库存与状态</small></span><DownloadSimple size={18} /></button><button className="glass-interactive" onClick={() => void exportFile("readers")}><span className="file-icon green"><Users size={18} /></span><span><strong>读者账户</strong><small>readers.csv · 不含密码</small></span><DownloadSimple size={18} /></button><button className="glass-interactive" onClick={() => void exportFile("loans")}><span className="file-icon amber"><BookBookmark size={18} /></span><span><strong>借阅记录</strong><small>loans.csv · 含逾期和罚款</small></span><DownloadSimple size={18} /></button></div></Panel></div>{preview.length > 0 && <Panel title="文件读取预览" detail="浏览器读取文件后，提交前先检查前几行内容。" className="preview-panel"><pre>{preview.join("\n")}</pre></Panel>}</>;
+  return <><PageHeader eyebrow="FILES / ADMIN" title="导入与导出" detail="使用 UTF-8 CSV 处理数据，导入会在后端整批校验。" /><ErrorBanner error={error} /><div className="data-grid"><Panel title="导入图书 CSV" detail="表头：title, author, isbn, publisher, price, total_quantity, category"><label className="drop-zone"><input type="file" accept=".csv,text/csv" onChange={(event) => void selectFile(event.target.files?.[0] || null)} /><span className="drop-icon">↥</span><strong>{file ? file.name : "选择一个 CSV 文件"}</strong><small>最大 2 MiB · 最多 1,000 行</small></label>{file && <><div className="file-meta"><span>{(file.size / 1024).toFixed(1)} KB</span><span>{preview.length > 1 ? `已预览 ${preview.length - 1} 行` : "空文件"}</span></div><Button onClick={() => void importFile()} disabled={loading}>{loading ? "校验并导入中…" : "确认导入"}</Button></>}{result && <div className={cn("import-result", result.errors.length ? "import-failed" : "import-success")}><strong>{result.errors.length ? "导入未提交" : "导入完成"}</strong><span>总行数 {result.total} · 成功 {result.success} · 问题行 {result.failed}</span>{result.errors.length > 0 && <ul>{result.errors.slice(0, 8).map((item) => <li key={`${item.row}-${item.reason}`}>第 {item.row} 行：{item.reason}</li>)}</ul>}</div>}</Panel><Panel title="导出数据" detail="下载的 CSV 可以用于报告中的文件写出证据。"><div className="export-list"><button onClick={() => void exportFile("books")}><span className="file-icon">B</span><span><strong>图书目录</strong><small>books.csv · 含库存与状态</small></span><b>↓</b></button><button onClick={() => void exportFile("readers")}><span className="file-icon green">R</span><span><strong>读者账户</strong><small>readers.csv · 不含密码</small></span><b>↓</b></button><button onClick={() => void exportFile("loans")}><span className="file-icon amber">L</span><span><strong>借阅记录</strong><small>loans.csv · 含逾期和罚款</small></span><b>↓</b></button></div></Panel></div>{preview.length > 0 && <Panel title="文件读取预览" detail="浏览器读取文件后，提交前先检查前几行内容。" className="preview-panel"><pre>{preview.join("\n")}</pre></Panel>}</>;
 }
 
 function ReaderLanding() { return <BooksPage />; }
 
 export default function App() {
-  useLiquidInteraction();
   const gateway = useMemo(() => createGateway(), []); const [user, setUser] = useState<User | null>(null); const [version, setVersion] = useState(0); const [notice, setNotice] = useState<{ message: string; tone: "success" | "error" | "info" } | null>(null);
   const reload = useCallback(() => setVersion((value) => value + 1), []); const toast = useCallback((message: string, tone: "success" | "error" | "info" = "info") => { setNotice({ message, tone }); window.setTimeout(() => setNotice(null), 3500); }, []);
   useEffect(() => { if (gateway.mode !== "live" || !storedUser()) return; gateway.me().then(setUser).catch(() => setUser(null)); }, [gateway]);
