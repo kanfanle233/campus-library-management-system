@@ -8,9 +8,9 @@
 [![Vite](https://img.shields.io/badge/Build-Vite%206-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Tests](https://img.shields.io/badge/Backend%20tests-27%20passed-2ea44f)](backend/tests)
 
-A course-oriented full-stack library management system for books, readers, borrowing, returns, fines, CSV import/export, and administration. The backend is a FastAPI + SQLAlchemy + SQLite service. The frontend is a React + TypeScript + Vite application with a Google Material 3 inspired visual language and a demo mode for static hosting.
+A course-oriented full-stack library management system for books, readers, borrowing, returns, fines, CSV import/export, and administration. The backend is a FastAPI + SQLAlchemy + SQLite service. The frontend is a React + TypeScript + Vite application with an Apple-inspired Liquid Glass interface and a demo mode for static hosting.
 
-这是一个面向课程考核的前后端一体化图书管理系统，覆盖图书、读者、借阅、归还、罚款、CSV 文件读写、统计分析和管理员操作。后端使用 FastAPI、SQLAlchemy 和 SQLite；前端使用 React、TypeScript 和 Vite，采用 Google Material 3 风格，并提供适合静态部署的演示模式。
+这是一个面向课程考核的前后端一体化图书管理系统，覆盖图书、读者、借阅、归还、罚款、CSV 文件读写、统计分析和管理员操作。后端使用 FastAPI、SQLAlchemy 和 SQLite；前端使用 React、TypeScript 和 Vite，采用 Apple 风格的 Liquid Glass 液态玻璃界面，并提供适合静态部署的演示模式。
 
 **Repository / 仓库:** [github.com/kanfanle233/campus-library-management-system](https://github.com/kanfanle233/campus-library-management-system)
 
@@ -58,21 +58,21 @@ The demo reference date is <code>2026-08-31</code>, so screenshots and test data
 | Analytics | Dashboard totals, 7/30/90-day borrow/return trends, category inventory, popular books, overdue buckets |
 | File operations | UTF-8/UTF-8-BOM book CSV import, all-or-nothing validation, book/reader/loan CSV export |
 | Frontend roles | Administrator workspace and reader workspace with guarded navigation |
-| UX | Responsive sidebar, Google Sans Flex/Noto Sans SC typography, status pills, loading states, error messages, print-friendly receipt |
+| UX | Floating glass navigation, Apple system typography, pointer-responsive highlights, scroll feedback, mobile drawer, status and loading states |
 
 ### Screenshots
 
 The following screenshots are versioned under <code>frontend/screenshots/</code> and can be rendered directly by GitHub.
 
-| Login and watermark | Administrator overview |
+| Liquid Glass login and production watermark | Administrator overview |
 | --- | --- |
-| ![Login page with production watermark](frontend/screenshots/login-watermark.png) | ![Administrator overview](frontend/screenshots/live-overview.png) |
+| ![Liquid Glass login with production watermark](frontend/screenshots/liquid-glass-login.png) | ![Liquid Glass administrator overview](frontend/screenshots/liquid-glass-admin-overview.png) |
 
-| Analytics | Reader workspace watermark |
+| Responsive overview | Mobile navigation |
 | --- | --- |
-| ![Analytics dashboard](frontend/screenshots/live-seeded-analytics.png) | ![Reader page with identity watermark](frontend/screenshots/watermark-reader.png) |
+| ![Liquid Glass mobile overview](frontend/screenshots/liquid-glass-mobile.png) | ![Liquid Glass mobile navigation](frontend/screenshots/liquid-glass-mobile-menu.png) |
 
-Additional evidence images include [book and reader management](frontend/screenshots/admin-overview.png), [login](frontend/screenshots/login.png), [real-data admin view](frontend/screenshots/watermark-live-admin.png), and [analytics viewport](frontend/screenshots/analytics-viewport.png).
+The selected design target, final implementation comparison, and focused visual QA evidence are stored in [the screenshot directory](frontend/screenshots/). The complete review is recorded in [design-qa.md](design-qa.md).
 
 ### Architecture and workflow
 
@@ -150,7 +150,7 @@ flowchart TD
 | Routing/build | React Router + Vite 6 | Hash routing and static bundles |
 | Charts/data | Recharts + Papa Parse | Analytics charts and CSV parsing |
 | Forms | React Hook Form + Zod | Browser-side form state and validation |
-| Styling | CSS variables + Google Sans Flex + Noto Sans SC | Material 3 inspired visual system |
+| Styling | CSS variables + Apple system font stack + Phosphor Icons | Liquid Glass inspired responsive visual system |
 | Verification | Pytest + Vitest + TypeScript compiler | Backend and frontend quality checks |
 
 ### Project structure
@@ -176,7 +176,7 @@ flowchart TD
 │   ├── src/App.tsx          # routes, role guards, pages, interactions
 │   ├── src/data.ts          # demo/live gateway implementations
 │   ├── src/types.ts         # shared frontend contracts
-│   ├── src/theme.css        # Google-style tokens and responsive layout
+│   ├── src/theme.css        # Liquid Glass tokens and responsive layout
 │   ├── screenshots/         # committed UI evidence
 │   ├── package.json
 │   └── README.md
@@ -358,12 +358,13 @@ The visual and repository organization references should be cited as design or d
 
 Recommended links:
 
-1. [Material 3](https://m3.material.io/) — color roles, components, layout, and accessibility guidance.
-2. [Google Sans Flex](https://design.google/library/google-sans-flex-font/) — typography reference used by the frontend.
-3. [Arnob Mahmud's Library Management System](https://github.com/arnobt78/Library-Management-System--NextJS-FullStack) — information architecture and README organization reference.
-4. [FastAPI documentation](https://fastapi.tiangolo.com/), [SQLAlchemy documentation](https://docs.sqlalchemy.org/), and [React documentation](https://react.dev/) — implementation references.
-5. [Mermaid documentation](https://mermaid.js.org/) — diagrams embedded in this README.
-6. The included [course assessment document](./人工智能导-非试卷形式考核方案（暑期国际班重修）.docx) and [course evidence checklist](backend/docs/course-evidence-checklist.md) — assessment and evidence references.
+1. [Apple Human Interface Guidelines: Materials](https://developer.apple.com/design/human-interface-guidelines/materials) — Liquid Glass hierarchy, legibility, and restrained material usage.
+2. [Apple Developer: Liquid Glass](https://developer.apple.com/documentation/TechnologyOverviews/liquid-glass) — layout, navigation, iconography, color, and adaptive interface guidance.
+3. [MDN: backdrop-filter](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter) and [prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion) — web implementation and accessibility references.
+4. [Arnob Mahmud's Library Management System](https://github.com/arnobt78/Library-Management-System--NextJS-FullStack) — information architecture and README organization reference.
+5. [FastAPI documentation](https://fastapi.tiangolo.com/), [SQLAlchemy documentation](https://docs.sqlalchemy.org/), and [React documentation](https://react.dev/) — implementation references.
+6. [Mermaid documentation](https://mermaid.js.org/) — diagrams embedded in this README.
+7. The included [course assessment document](./人工智能导-非试卷形式考核方案（暑期国际班重修）.docx) and [course evidence checklist](backend/docs/course-evidence-checklist.md) — assessment and evidence references.
 
 Suggested GB/T 7714-style entries for a report:
 
@@ -371,13 +372,16 @@ Suggested GB/T 7714-style entries for a report:
 [1] 课程方案. 《人工智能导论》-非试卷形式考核方案（暑期国际班重修）[课程文件]. 校内课程资料, 访问日期: 2026-08-31.
 [2] MAHMUD A. Library Management System--NextJS-FullStack[EB/OL]. GitHub.
     https://github.com/arnobt78/Library-Management-System--NextJS-FullStack, 访问日期: 2026-08-31.
-[3] GOOGLE. Material 3[EB/OL]. https://m3.material.io/, 访问日期: 2026-08-31.
-[4] GOOGLE DESIGN. Google Sans Flex[EB/OL].
-    https://design.google/library/google-sans-flex-font/, 访问日期: 2026-08-31.
-[5] MERMAID. Mermaid documentation[EB/OL]. https://mermaid.js.org/, 访问日期: 2026-08-31.
+[3] APPLE. Human Interface Guidelines: Materials[EB/OL].
+    https://developer.apple.com/design/human-interface-guidelines/materials, 访问日期: 2026-09-04.
+[4] APPLE. Liquid Glass[EB/OL].
+    https://developer.apple.com/documentation/TechnologyOverviews/liquid-glass, 访问日期: 2026-09-04.
+[5] MDN CONTRIBUTORS. backdrop-filter[EB/OL].
+    https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter, 访问日期: 2026-09-04.
+[6] MERMAID. Mermaid documentation[EB/OL]. https://mermaid.js.org/, 访问日期: 2026-08-31.
 ~~~
 
-For figure captions, identify the source of the design idea, for example: “Figure 3. Google Material 3 inspired admin overview, implemented in this project; visual reference: [3].” Cite the reference repository when discussing page organization, and label all screenshots as project-generated evidence.
+For figure captions, identify the source of the design idea, for example: “Figure 3. Apple Liquid Glass inspired administrator overview, implemented in this project; visual reference: [3].” Cite the reference repository when discussing page organization, and label all screenshots as project-generated evidence.
 
 ### License
 
@@ -401,11 +405,11 @@ No separate open-source license file has been added. Treat this repository as co
 - 管理员：总览、图书增改停用、读者增改注销、借阅/归还/罚款、统计分析、CSV 导入导出。
 - 读者：图书目录、关键词检索、图书详情、借阅、我的借阅、个人资料和借阅凭单。
 - 后端：JWT 登录、角色权限、SQLite 事务、库存约束、逾期费用、整批 CSV 校验、OpenAPI 文档。
-- 前端：Google Sans Flex、Noto Sans SC、Material 3 风格颜色角色、响应式侧栏、状态提示、加载状态、打印凭单。
+- 前端：Apple 系统字体栈、液态磨砂导航、鼠标响应光晕、滚动进度、移动端抽屉、状态提示、加载状态和打印凭单。
 
 ### 前端截图
 
-截图位于 <code>frontend/screenshots/</code>。登录页、管理员总览、数据分析和读者水印截图已经写入本 README 上方，GitHub 会使用相对路径渲染。其余证据包括图书/读者管理、登录页、实时管理员页面和分析页视口。
+截图位于 <code>frontend/screenshots/</code>。本 README 上方展示了新版登录页、管理员总览、移动端总览和移动端菜单，GitHub 会直接渲染相对路径。视觉目标、最终对照图和重点区域对照也保存在同一目录，检查记录见 <code>design-qa.md</code>。
 
 ### 架构和流程图
 
@@ -424,7 +428,7 @@ No separate open-source license file has been added. Treat this repository as co
 | 认证与校验 | PyJWT、pwdlib Argon2、Pydantic、pydantic-settings |
 | 前端 | React 19、TypeScript、React Router、Vite 6 |
 | 数据与图表 | Recharts、Papa Parse、React Hook Form、Zod |
-| 字体与样式 | Google Sans Flex、Google Sans Code、Noto Sans SC、CSS 变量 |
+| 字体与样式 | Apple 系统字体栈、苹方中文回退、Phosphor Icons、CSS 变量 |
 | 测试 | Pytest、Vitest、TypeScript compiler |
 
 ### 目录结构
@@ -527,14 +531,15 @@ cd frontend && pnpm test && pnpm exec tsc --noEmit && pnpm build
 
 报告中应区分“设计参考”和“本项目实现”，不要把参考仓库的功能或代码写成本项目功能。建议引用：
 
-1. Google [Material 3](https://m3.material.io/)：颜色、组件、布局和无障碍规范。
-2. Google Design [Google Sans Flex](https://design.google/library/google-sans-flex-font/)：字体参考。
-3. Arnob Mahmud 的 [Library Management System](https://github.com/arnobt78/Library-Management-System--NextJS-FullStack)：页面信息组织和 README 编排参考。
-4. [FastAPI](https://fastapi.tiangolo.com/)、[SQLAlchemy](https://docs.sqlalchemy.org/)、[React](https://react.dev/)：实现文档。
-5. [Mermaid](https://mermaid.js.org/)：README 流程图语法。
-6. 随项目提交的课程方案文件和 [课程证据清单](backend/docs/course-evidence-checklist.md)：评分标准与证据清单。
+1. Apple [Human Interface Guidelines: Materials](https://developer.apple.com/design/human-interface-guidelines/materials)：Liquid Glass 的层级、可读性和使用范围。
+2. Apple Developer [Liquid Glass](https://developer.apple.com/documentation/TechnologyOverviews/liquid-glass)：布局、导航、图标、颜色和自适应界面建议。
+3. MDN [backdrop-filter](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter) 与 [prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion)：网页磨砂效果与动效无障碍实现。
+4. Arnob Mahmud 的 [Library Management System](https://github.com/arnobt78/Library-Management-System--NextJS-FullStack)：页面信息组织和 README 编排参考。
+5. [FastAPI](https://fastapi.tiangolo.com/)、[SQLAlchemy](https://docs.sqlalchemy.org/)、[React](https://react.dev/)：实现文档。
+6. [Mermaid](https://mermaid.js.org/)：README 流程图语法。
+7. 随项目提交的课程方案文件和 [课程证据清单](backend/docs/course-evidence-checklist.md)：评分标准与证据清单。
 
-图注可以写成：“图 3：本项目实现的 Google Material 3 风格管理员总览页面；设计参考：[1]。”截图应标注为本项目运行生成的证据。
+图注可以写成：“图 3：本项目实现的 Apple Liquid Glass 风格管理员总览页面；设计参考：[1]。”截图应标注为本项目运行生成的证据。
 
 ### 许可证
 
